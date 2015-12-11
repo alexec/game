@@ -24,8 +24,8 @@ var Key = {
 
   var Game = {
     fps: 60,
-    width: 640,
-    height: 480
+    width: 32 * 20,
+    height: 32 * 16
   };
 
   Game._onEachFrame = (function() {
@@ -88,31 +88,46 @@ var Key = {
   function Player() {
     this.x = 0;
     this.y = 0;
+    this.speed = 4;
+    this.move = 'Right';
+    this.image = new Image();
+    this.image.src = '/images/pacman.gif';
   }
 
   Player.prototype.draw = function(context) {
-    context.fillRect(this.x, this.y, 32, 32);
+    context.drawImage(this.image, this.x, this.y);
   };
 
   Player.prototype.moveLeft = function() {
-    this.x -= 1;
+    this.x = this.x < -32 ? Game.width : this.x - this.speed;
   };
 
   Player.prototype.moveRight = function() {
-    this.x += 1;
+    this.x = this.x > Game.width ? - 32 : this.x + this.speed;
   };
 
   Player.prototype.moveUp = function() {
-    this.y -= 1;
+    this.y = this.y < -32 ? Game.height : this.y - this.speed;
   };
 
   Player.prototype.moveDown = function() {
-    this.y += 1;
+    this.y = this.y > Game.height ? -32 : this.y + this.speed;
   };
 
   Player.prototype.update = function() {
-    if (Key.isDown(Key.UP)) this.moveUp();
-    if (Key.isDown(Key.LEFT)) this.moveLeft();
-    if (Key.isDown(Key.DOWN)) this.moveDown();
-    if (Key.isDown(Key.RIGHT)) this.moveRight();
+    if (Key.isDown(Key.UP)) this.nextMove = 'Up';
+    if (Key.isDown(Key.LEFT)) this.nextMove = 'Left';
+    if (Key.isDown(Key.DOWN)) this.nextMove = 'Down';
+    if (Key.isDown(Key.RIGHT)) this.nextMove = 'Right';
+
+    if (this.x % 32 == 0 && this.y % 32 == 0 && this.nextMove) {
+      this.move = this.nextMove ? this.nextMove : this.move;
+      this.nextMove = null;
+    }
+
+    this["move" + this.move]();
   };
+
+$(function() {
+  Game.start()
+})
