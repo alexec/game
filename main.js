@@ -1,23 +1,21 @@
+
 function $(w) {
-    var tagName = w;
-    var id = w.substr(1);
-    return w.indexOf("#") == 0 ?  document.getElementById(id) : document.getElementsByTagName(tagName)[0];
+    var tagName = w, id = w.substr(1);
+    return w.indexOf("#") === 0 ?  document.getElementById(id) : document.getElementsByTagName(tagName)[0];
     
 }
 
 var canvas = $("canvas");
 
 function Arena() {
-    var _ = 0;
-    var P = 2;
-    var w = 3;
+    var _ = 0, P = 2, w = 3;
     this.grid = [
         [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w],
         [w,1,1,1,1,1,1,1,1,1,1,w,1,1,1,1,1,1,1,1,1,1,w],
         [w,1,w,w,w,1,w,w,w,w,1,w,1,w,w,w,w,1,w,w,w,1,w],
         [w,P,w,_,w,1,w,_,_,w,1,w,1,w,_,_,w,1,w,_,w,P,w],
         [w,1,w,w,w,1,w,w,w,w,1,w,1,w,w,w,w,1,w,w,w,1,w],
-        [w,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,w],
+        [w,1,1,1,1,1,1,1,1,1,1,P,1,1,1,1,1,1,1,1,1,1,w],
         [w,1,w,w,w,1,w,1,w,w,w,w,w,w,w,1,w,1,w,w,w,1,w],
         [w,1,1,1,1,1,w,1,1,1,1,w,1,1,1,1,w,1,1,1,1,1,w],
         [w,w,w,w,w,1,w,w,w,w,1,w,1,w,w,w,w,1,w,w,w,w,w],
@@ -33,7 +31,7 @@ function Arena() {
         [w,w,w,1,w,1,w,1,w,w,w,w,w,w,w,1,w,1,w,1,w,w,w],
         [w,1,1,1,1,1,w,1,1,1,1,w,1,1,1,1,w,1,1,1,1,1,w],
         [w,1,w,w,w,w,w,w,w,w,1,w,1,w,w,w,w,1,w,w,w,1,w],
-        [w,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,w],
+        [w,1,1,1,1,1,1,1,1,1,1,P,1,1,1,1,1,1,1,1,1,1,w],
         [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w],
     ];
     this.width = this.grid[0].length;
@@ -55,14 +53,14 @@ Arena.prototype.draw = function(canvas) {
                 case 1:
                     ctx.fillStyle = "#fff";
                     ctx.beginPath()
-                    ctx.arc(dx + w/2, dy + h/2, w/8, 0, 2 * Math.PI)
+                    ctx.arc(dx + w/2, dy + h/2, w/16 + h /16, 0, 2 * Math.PI)
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case 2:
                     ctx.fillStyle = "#fff";
                     ctx.beginPath()
-                    ctx.arc(dx + w/2, dy + h/2, w/4, 0, 2 * Math.PI)
+                    ctx.arc(dx + w/2, dy + h/2, w/8 + h /8, 0, 2 * Math.PI)
                     ctx.fill();
                     ctx.closePath();
                     break;
@@ -71,7 +69,7 @@ Arena.prototype.draw = function(canvas) {
                     ctx.fillRect(dx, dy, w, h);
                     break;
             }
-           dy+=h;
+           dy += h;
         }
         dx += w; 
     }
