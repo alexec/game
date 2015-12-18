@@ -125,11 +125,11 @@ Arena.prototype.draw = function(ctx) {
             }
         }
     }
-    for (var i in this.players) {
-      var player = this.players[i];
-      var image = new Image();
-      image.src = '/images/pacman.gif';
-      ctx.drawImage(image, player.x * w, player.y * h);
+    for (var playerId in this.players) {
+      var player = this.players[playerId];
+      var d = 32
+      var i = playerId % 4;
+      ctx.drawImage(spriteSheet, d,d * (1 + i),d,d,player.x * w, player.y * h, d, d);
     }
 };
 

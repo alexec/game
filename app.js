@@ -29,21 +29,27 @@ eval(fs.readFileSync('public/javascripts/Arena.js').toString());
 
 var arena = new Arena();
 var maxPlayerId = 0;
+var sockets = {};
+
 
 io.sockets.on('connection', function(socket) {
   var playerId = maxPlayerId;
-  var player = arena.addPlayer(playerId, 1, 1);
+  var player = arena.addPlayer(playerId, parseInt(arena.width / 2), parseInt(arena.height / 2));
+
+  socket.emit("syncArena", arena);
+
+  sockets[socket] = true;
 
   socket.on('disconnect', function() {
     arena.removePlayer(playerId);
+    delete sockets[socket];
   })
-
-  socket.emit('playerAdded', {"playerId": playerId, "x": player.x, "y": player.y, "gobbler": player.gobbler});
+  io.emit('playerAdded', {"playerId": playerId, "x": player.x, "y": player.y, "gobbler": player.gobbler});
 
   socket.on('changePlayerDirection', function(e) {
       var player = arena.players[playerId];
       player.direction = e.direction;
-      socket.emit('syncPlayer', {"playerId": playerId, "direction": e.direction, "x": player.x, "y": player.y});
+      io.emit('syncPlayer', {"playerId": playerId, "direction": e.direction, "x": player.x, "y": player.y});
   });
 
   maxPlayerId++;

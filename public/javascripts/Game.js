@@ -47,6 +47,10 @@ Game.start = function() {
       Game.socket.emit("changePlayerDirection", {"direction": direction})
   }, false);
 
+  this.socket.on('syncArena', function(e) {
+    Game.arena.grid = e.grid;
+    Game.arena.players = e.players;
+  });
   this.socket.on('playerAdded', function(e) {
     Game.arena.addPlayer(e.playerId, e.x, e.y);
   });
@@ -84,3 +88,6 @@ Game.draw = function() {
 Game.update = function() {
   this.arena.update();
 };
+
+var spriteSheet = new Image();
+spriteSheet.src = '/images/sprite-sheet.gif';
