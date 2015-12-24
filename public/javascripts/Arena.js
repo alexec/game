@@ -77,37 +77,45 @@ Arena.prototype.updatePlayer = function(player) {
       this.setGrid(player.x, player.y, 0);
     }
   }
-  switch(player.direction) {
-    case 'l':
-      if (!this.isWalledAt(player.x - this.speed, player.y)) {
+  if (this.playerCanMove(player, player.direction)) {
+    switch(player.direction) {
+      case 'l':
         player.x -= this.speed;
         if (player.x < 0) { player.x = this.width;}
-      }
-      break;
-    case 'r':
-      if (!this.isWalledAt(player.x + this.gridSpacing, player.y)) {
+        break;
+      case 'r':
         player.x += this.speed;
         if (player.x >= this.width) { player.x = 0;}
-      }
-      break;
-    case 'u':
-      if (!this.isWalledAt(player.x, player.y - this.speed)) {
+        break;
+      case 'u':
         player.y -= this.speed;
         if (player.y < 0) { player.y = this.height;}
-      }
-      break;
-    case 'd':
-      if (!this.isWalledAt(player.x, player.y + this.gridSpacing)) {
+        break;
+      case 'd':
         player.y += this.speed;
         if (player.y >= this.height) { player.y = 0;}
-      }
-      break;
+        break;
+    }
   }
-  if (player.x % this.gridSpacing === 0 && player.y % this.gridSpacing === 0) {
+  if (player.x % this.gridSpacing === 0 && player.y % this.gridSpacing === 0 &&
+    this.playerCanMove(player, player.nextDirection)) {
     player.direction = player.nextDirection;
   }
-
 };
+
+Arena.prototype.playerCanMove  = function(player, direction) {
+  switch(direction) {
+    case 'l':
+      return !this.isWalledAt(player.x - this.speed, player.y);
+    case 'r':
+      return !this.isWalledAt(player.x + this.gridSpacing, player.y);
+    case 'u':
+      return !this.isWalledAt(player.x, player.y - this.speed);
+    case 'd':
+      return !this.isWalledAt(player.x, player.y + this.gridSpacing);
+  }
+};
+
 
 Arena.prototype.addPlayer = function(playerId, x, y, gobbler ) {
 
