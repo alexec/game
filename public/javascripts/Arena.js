@@ -28,10 +28,11 @@ function Arena() {
         [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w],
     ];
     this.gridSpacing = 32;
+    this.speed = 2;
     this.width = this.grid[0].length * this.gridSpacing;
     this.height = this.grid.length * this.gridSpacing;
-    this.players = {}
-    this.listener = function() {};
+    this.players = {};
+    this.pillTimeLeft = 0;
 };
 Arena.prototype.hasPlayers = function() {
   for (var playerId in this.players) {
@@ -44,6 +45,7 @@ Arena.prototype.update = function() {
   for (var playerId in this.players){
     this.updatePlayer(this.players[playerId]);
   }
+  this.pillTimeLeft = Math.max(0, this.pillTimeLeft - 1);
 };
 
 Arena.prototype.isWalledAt = function(x,y) {
@@ -60,9 +62,12 @@ Arena.prototype.getGridY = function(y) {
   return parseInt(y / this.gridSpacing);
 };
 Arena.prototype.setGrid = function(x,y,value) {
-  if (this.getGrid(x, y) != value)  {
+  var oldValue = this.getGrid(x, y);
+  if (oldValue != value)  {
+    if (oldValue == 2) {
+      this.pillTimeLeft += 500 / this.speed;
+    }
     this.grid[this.getGridY(y)][this.getGridX(x)] = value;
-    this.listener("gridChanged", {"x": x, "y": y, "value": value});
   }
 };
 
@@ -74,26 +79,26 @@ Arena.prototype.updatePlayer = function(player) {
   }
   switch(player.direction) {
     case 'l':
-      if (!this.isWalledAt(player.x - 1, player.y)) {
-        player.x--;
+      if (!this.isWalledAt(player.x - this.speed, player.y)) {
+        player.x -= this.speed;
         if (player.x < 0) { player.x = this.width;}
       }
       break;
     case 'r':
       if (!this.isWalledAt(player.x + this.gridSpacing, player.y)) {
-        player.x++;
+        player.x += this.speed;
         if (player.x >= this.width) { player.x = 0;}
       }
       break;
     case 'u':
-      if (!this.isWalledAt(player.x, player.y - 1)) {
-        player.y--;
+      if (!this.isWalledAt(player.x, player.y - this.speed)) {
+        player.y -= this.speed;
         if (player.y < 0) { player.y = this.height;}
       }
       break;
     case 'd':
       if (!this.isWalledAt(player.x, player.y + this.gridSpacing)) {
-        player.y++;
+        player.y += this.speed;
         if (player.y >= this.height) { player.y = 0;}
       }
       break;
@@ -154,7 +159,7 @@ Arena.prototype.draw = function(ctx) {
                     ctx.closePath();
                     break;
                 case 3:
-                    ctx.fillStyle = "#00f";
+                    ctx.fillStyle = this.pillTimeLeft > 0 ? "#f00": "#00f";
                     ctx.fillRect(x, y, w, h);
                     break;
             }

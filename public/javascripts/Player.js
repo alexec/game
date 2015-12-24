@@ -5,6 +5,7 @@ function Player(x, y, gobbler) {
   this.direction = '';
   this.nextDirection = '';
   this.gobbler = gobbler;
+  this.alive = true;
 }
 
 Player.number = 5;
