@@ -29,44 +29,27 @@ eval(fs.readFileSync('public/javascripts/Arena.js').toString());
 
 var arena = new Arena();
 var maxPlayerId = 0;
-var sockets = {};
 
-//arena.listener = function(event, data) {
-//  io.emit(event, data);
-//};
-
-function bestType() {
-  var typeCount = {0:0, 1:0, 2:0, 3:0, 4:0};
-  for (var playerId in arena.players) {
-    typeCount[arena.players[playerId].type]++;
-  }
-  console.log("typeCount=", typeCount);
-  var bestType = 0;
-  for (var type in typeCount) {
-    if (typeCount[type] < typeCount[bestType]) {
-      bestType = type;
-    }
-  }
-  return bestType;
+function getPosition(playerId, type) {
+  var gobbler = type === 0;
+  var n = playerId % 3;
+  return {
+    x: {true: [5, 11, 17][n], false: 11}[gobbler] * arena.gridSpacing,
+    y: {true: [1, 17, 1][n], false: 11}[gobbler] * arena.gridSpacing
+  };
 }
 
 io.sockets.on('connection', function(socket) {
 
-  var type = bestType();
+  var type = arena.bestType();
   var playerId = maxPlayerId;
-  var gobbler = type === 0;
-  var n = parseInt(Math.random() * 3);
-  var x = {true: [5, 11, 17][n], false: 11}[gobbler] * arena.gridSpacing ;
-  var y = {true: [1, 17, 1][n], false: 11}[gobbler] * arena.gridSpacing ;
-  var player = arena.addPlayer(playerId, x, y, type);
+  var pos = getPosition(playerId, type);
+  var player = arena.addPlayer(playerId, pos.x, pos.y, type);
 
   socket.emit("syncArena", arena);
 
-  sockets[socket] = true;
-
   socket.on('disconnect', function() {
     arena.removePlayer(playerId);
-    delete sockets[socket];
     io.emit('playerRemoved', {"playerId": playerId});
     if (!arena.hasPlayers()) {
       maxPlayerId = 0;
@@ -84,6 +67,30 @@ io.sockets.on('connection', function(socket) {
   maxPlayerId++;
 });
 
+function slaughter() {
+  var gobblerVulnerable = arena.pillTimeLeft <= 0;
+  for (var playerId in arena.players) {
+    var murderer = arena.players[playerId];
+    var murdererGobler = murderer.type === 0;
+    if (murdererGobler && !gobblerVulnerable || !murdererGobler && gobblerVulnerable) {
+      for (var playerId in arena.players) {
+        var victim = arena.players[playerId];
+        var victimGobbler = victim.type === 0;
+
+        if (murdererGobler !== victimGobbler && murderer.x === victim.x && murderer.y === victim.y) {
+          var pos = getPosition(parseInt(Math.random() * 3), victim.type);
+
+          victim.alive = false;
+          victim.x = pos.x;
+          victim.y = pos.y;
+
+          io.emit("playerKilled", {"playerId": playerId, "x": victim.x, "y": victim.y});
+        }
+      }
+    }
+  }
+}
+
 var run = (function() {
   var fps = 60, loops = 0, skipTicks = 1000 / fps,
       maxFrameSkip = 10,
@@ -94,6 +101,8 @@ var run = (function() {
 
     while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
       arena.update();
+      slaughter();
+
       nextGameTick += skipTicks;
       loops++;
     }

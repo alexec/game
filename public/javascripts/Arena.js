@@ -119,7 +119,7 @@ Arena.prototype.playerCanMove  = function(player, direction) {
 
 Arena.prototype.addPlayer = function(playerId, x, y, type ) {
 
-  console.log("addPlayer playerId=" + playerId + ", x=" + x + ", y=" + y);
+  console.log("addPlayer playerId=" + playerId + ", x=" + x + ", y=" + y, ", type=" + type);
 
   var player = new Player(x, y, type);
   this.players[playerId] = player;
@@ -138,6 +138,13 @@ Arena.prototype.syncPlayer = function(playerId, x, y, direction, nextDirection) 
 Arena.prototype.removePlayer = function(playerId) {
   console.log("removePlayer playerId=" + playerId);
   delete this.players[playerId];
+};
+Arena.prototype.killPlayer = function(playerId, x, y) {
+  console.log("killPlayer playerId=" + playerId);
+  var player = this.players[playerId];
+  player.alive = false;
+  player.x = x;
+  player.y = y;
 };
 
 Arena.prototype.draw = function(ctx) {
@@ -193,4 +200,17 @@ Arena.prototype.draw = function(ctx) {
     }
 };
 
-// end Arena
+Arena.prototype.bestType = function() {
+  var typeCount = {0:0, 1:0, 2:0, 3:0, 4:0};
+  for (var playerId in this.players) {
+    typeCount[this.players[playerId].type]++;
+  }
+  console.log("typeCount=", typeCount);
+  var bestType = 0;
+  for (var type in typeCount) {
+    if (typeCount[type] < typeCount[bestType]) {
+      bestType = type;
+    }
+  }
+  return bestType;
+}

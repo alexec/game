@@ -58,6 +58,9 @@ Game.start = function() {
   this.socket.on('syncPlayer', function(e) {
     Game.arena.syncPlayer(e.playerId, e.x, e.y, e.direction, e.nextDirection);
   });
+  this.socket.on('playerKilled', function(e) {
+    Game.arena.killPlayer(e.playerId, e.x, e.y);
+  });
 };
 
 Game.run = (function() {
