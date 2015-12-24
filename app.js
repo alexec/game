@@ -35,13 +35,30 @@ var sockets = {};
 //  io.emit(event, data);
 //};
 
+function bestType() {
+  var typeCount = {0:0, 1:0, 2:0, 3:0, 4:0};
+  for (var playerId in arena.players) {
+    typeCount[arena.players[playerId].type]++;
+  }
+  console.log("typeCount=", typeCount);
+  var bestType = 0;
+  for (var type in typeCount) {
+    if (typeCount[type] < typeCount[bestType]) {
+      bestType = type;
+    }
+  }
+  return bestType;
+}
+
 io.sockets.on('connection', function(socket) {
-  // TODO could add two gobblers
-  var playerId = arena.players[0] ?  maxPlayerId : 0;
-  var gobbler = playerId % Player.number == 0;
-  var x = parseInt(arena.width / 2 / arena.gridSpacing) * arena.gridSpacing ;
-  var y = parseInt(arena.height / 2 / arena.gridSpacing + (gobbler ? 6 : 0))  * arena.gridSpacing;
-  var player = arena.addPlayer(playerId, x, y, gobbler);
+
+  var type = bestType();
+  var playerId = maxPlayerId;
+  var gobbler = type === 0;
+  var n = parseInt(Math.random() * 3);
+  var x = {true: [5, 11, 17][n], false: 11}[gobbler] * arena.gridSpacing ;
+  var y = {true: [1, 17, 1][n], false: 11}[gobbler] * arena.gridSpacing ;
+  var player = arena.addPlayer(playerId, x, y, type);
 
   socket.emit("syncArena", arena);
 
@@ -55,7 +72,7 @@ io.sockets.on('connection', function(socket) {
       maxPlayerId = 0;
     }
   })
-  io.emit('playerAdded', {"playerId": playerId, "x": player.x, "y": player.y, "gobbler": player.gobbler});
+  io.emit('playerAdded', {"playerId": playerId, "x": player.x, "y": player.y, "type": player.type});
 
   socket.on('changePlayerDirection', function(e) {
       var player = arena.players[playerId];

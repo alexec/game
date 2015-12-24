@@ -1,10 +1,10 @@
 
-function Player(x, y, gobbler) {
+function Player(x, y, type) {
   this.x = x;
   this.y = y;
+  this.type = type;
   this.direction = '';
   this.nextDirection = '';
-  this.gobbler = gobbler;
   this.alive = true;
 }
 

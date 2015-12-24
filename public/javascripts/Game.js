@@ -50,7 +50,7 @@ Game.start = function() {
     Game.arena.setGrid(e.x, e.y, e.value);
   });
   this.socket.on('playerAdded', function(e) {
-    Game.arena.addPlayer(e.playerId, e.x, e.y, e.gobbler);
+    Game.arena.addPlayer(e.playerId, e.x, e.y, e.type);
   });
   this.socket.on('playerRemoved', function(e) {
     Game.arena.removePlayer(e.playerId);

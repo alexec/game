@@ -73,7 +73,7 @@ Arena.prototype.setGrid = function(x,y,value) {
 
 Arena.prototype.updatePlayer = function(player) {
   if (player.x % this.gridSpacing === 0 && player.y % this.gridSpacing === 0) {
-    if (player.gobbler && this.getGrid(player.x, player.y) > 0) {
+    if (player.type === 0 && this.getGrid(player.x, player.y) > 0) {
       this.setGrid(player.x, player.y, 0);
     }
   }
@@ -117,11 +117,11 @@ Arena.prototype.playerCanMove  = function(player, direction) {
 };
 
 
-Arena.prototype.addPlayer = function(playerId, x, y, gobbler ) {
+Arena.prototype.addPlayer = function(playerId, x, y, type ) {
 
   console.log("addPlayer playerId=" + playerId + ", x=" + x + ", y=" + y);
 
-  var player = new Player(x, y, gobbler);
+  var player = new Player(x, y, type);
   this.players[playerId] = player;
   return player;
 };
@@ -177,11 +177,10 @@ Arena.prototype.draw = function(ctx) {
     var d = this.gridSpacing;
     for (var playerId in this.players) {
       var player = this.players[playerId];
-      var playerIndex = playerId % Player.number;
 
-      var numFrames = player.gobbler ? 3 : 2;
+      var numFrames = player.type === 0 ? 3 : 2;
       var frame = (player.x + player.y) % numFrames;
-      var origin = {0: 0, 1: 16, 2: 24, 3: 32, 4: 40}[playerIndex];
+      var origin = {0: 0, 1: 16, 2: 24, 3: 32, 4: 40}[player.type];
       var offset = Math.max('udlr'.indexOf(player.direction) * numFrames, 0);
       var i = origin + offset + frame;
       var x = i % 8;
