@@ -27,109 +27,156 @@ function Arena() {
         [w,1,1,1,1,1,1,1,1,1,1,P,1,1,1,1,1,1,1,1,1,1,w],
         [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w],
     ];
-    this.width = this.grid[0].length;
-    this.height = this.grid.length;
+    this.gridSpacing = 32;
+    this.width = this.grid[0].length * this.gridSpacing;
+    this.height = this.grid.length * this.gridSpacing;
     this.players = {}
+    this.listener = function() {};
+};
+Arena.prototype.hasPlayers = function() {
+  for (var playerId in this.players) {
+    return true;
+  }
+  return false;
 };
 
 Arena.prototype.update = function() {
-  for (var i in this.players){
-    this.updatePlayer(this.players[i]);
+  for (var playerId in this.players){
+    this.updatePlayer(this.players[playerId]);
   }
 };
 
 Arena.prototype.isWalledAt = function(x,y) {
-    return this.grid[y][x] === 3;
+    return this.getGrid(x,y) === 3;
+};
+
+Arena.prototype.getGrid = function(x,y) {
+    return this.grid[this.getGridY(y)][this.getGridX(x)];
+};
+Arena.prototype.getGridX = function(x) {
+  return parseInt(x / this.gridSpacing);
+};
+Arena.prototype.getGridY = function(y) {
+  return parseInt(y / this.gridSpacing);
+};
+Arena.prototype.setGrid = function(x,y,value) {
+  if (this.getGrid(x, y) != value)  {
+    this.grid[this.getGridY(y)][this.getGridX(x)] = value;
+    this.listener("gridChanged", {"x": x, "y": y, "value": value});
+  }
 };
 
 Arena.prototype.updatePlayer = function(player) {
+  if (player.x % this.gridSpacing === 0 && player.y % this.gridSpacing === 0) {
+    if (player.gobbler && this.getGrid(player.x, player.y) > 0) {
+      this.setGrid(player.x, player.y, 0);
+    }
+  }
   switch(player.direction) {
     case 'l':
-      if (!this.isWalledAt(player.x-1, player.y)) {
+      if (!this.isWalledAt(player.x - 1, player.y)) {
         player.x--;
+        if (player.x < 0) { player.x = this.width;}
       }
-      if (player.x < 0) { player.x = this.width;}
       break;
     case 'r':
-      if (!this.isWalledAt(player.x+1, player.y)) {
+      if (!this.isWalledAt(player.x + this.gridSpacing, player.y)) {
         player.x++;
+        if (player.x >= this.width) { player.x = 0;}
       }
-      if (player.x >= this.width) { player.x = 0;}
       break;
     case 'u':
-      if (!this.isWalledAt(player.x, player.y-1)) {
+      if (!this.isWalledAt(player.x, player.y - 1)) {
         player.y--;
+        if (player.y < 0) { player.y = this.height;}
       }
-      if (player.y < 0) { player.y = this.height;}
       break;
     case 'd':
-      if (!this.isWalledAt(player.x, player.y+1)) {
+      if (!this.isWalledAt(player.x, player.y + this.gridSpacing)) {
         player.y++;
+        if (player.y >= this.height) { player.y = 0;}
       }
-      if (player.y >= this.height) { player.y = 0;}
       break;
   }
-  if (player.gobbler && this.grid[player.y][player.x] > 0) {
-    console.log("nom!")
-    this.grid[player.y][player.x] = 0;
+  if (player.x % this.gridSpacing === 0 && player.y % this.gridSpacing === 0) {
+    player.direction = player.nextDirection;
   }
+
 };
 
-Arena.prototype.addPlayer = function(playerId,x,y) {
-  var player = new Player(x,y, playerId % 4 == 0);
+Arena.prototype.addPlayer = function(playerId, x, y, gobbler ) {
+
+  console.log("addPlayer playerId=" + playerId + ", x=" + x + ", y=" + y);
+
+  var player = new Player(x, y, gobbler);
   this.players[playerId] = player;
   return player;
 };
 
-Arena.prototype.syncPlayer = function(playerId, x, y, direction, go) {
+Arena.prototype.syncPlayer = function(playerId, x, y, direction, nextDirection) {
+  console.log("syncPlayer playerId=" + playerId + ", x=" + x +", y=" + y + ", direction=" + direction + ", nextDirection=" + nextDirection);
   var player = this.players[playerId];
   player.x = x;
   player.y = y;
   player.direction = direction;
+  player.nextDirection = nextDirection;
 };
 
 Arena.prototype.removePlayer = function(playerId) {
+  console.log("removePlayer playerId=" + playerId);
   delete this.players[playerId];
 };
 
 Arena.prototype.draw = function(ctx) {
   var canvas = ctx.canvas;
-    var w = canvas.width / this.width;
-    var h = canvas.height / this.height;
+    var w = this.gridSpacing;
+    var h = this.gridSpacing;
 
     ctx.clearRect(0,0,canvas.width, canvas.height);
     ctx.fillStyle = "#000";
     ctx.fillRect(0,0,canvas.width, canvas.height);
 
-    for (var x = 0; x < this.width; x++) {
-        for (var y = 0; y < this.height; y++) {
-            switch (this.grid[y][x]) {
+    for (var x = 0; x < this.width; x += this.gridSpacing) {
+        for (var y = 0; y < this.height; y += this.gridSpacing) {
+            switch (this.getGrid(x,y)) {
                 case 1:
                     ctx.fillStyle = "#fff";
                     ctx.beginPath()
-                    ctx.arc(x * w + w/2, y * h + h/2, w/16 + h /16, 0, 2 * Math.PI)
+                    ctx.arc(x  + w/2, y + h/2, w/16 + h /16, 0, 2 * Math.PI)
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case 2:
                     ctx.fillStyle = "#fff";
                     ctx.beginPath()
-                    ctx.arc(x * w + w/2, y * h + h/2, w/8 + h /8, 0, 2 * Math.PI)
+                    ctx.arc(x + w/2, y + h/2, w/8 + h /8, 0, 2 * Math.PI)
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case 3:
                     ctx.fillStyle = "#00f";
-                    ctx.fillRect(x * w, y * h, w, h);
+                    ctx.fillRect(x, y, w, h);
                     break;
             }
         }
     }
+
+    var d = this.gridSpacing;
     for (var playerId in this.players) {
       var player = this.players[playerId];
-      var d = 32
-      var i = playerId % 4;
-      ctx.drawImage(spriteSheet, d,d * (1 + i),d,d,player.x * w, player.y * h, d, d);
+      var playerIndex = playerId % Player.number;
+
+      var numFrames = player.gobbler ? 3 : 2;
+      var frame = (player.x + player.y) % numFrames;
+      var origin = {0: 0, 1: 16, 2: 24, 3: 32, 4: 40}[playerIndex];
+      var offset = Math.max('udlr'.indexOf(player.direction) * numFrames, 0);
+      var i = origin + offset + frame;
+      var x = i % 8;
+      var y = parseInt(i / 8);
+
+      //console.log("i=" + i + " numFrames=" + numFrames);
+      var frame = parseInt((player.x + player.y) / 2) % 2;
+      ctx.drawImage(spriteSheet, x * d, y * d, d, d, player.x, player.y, d, d);
     }
 };
 

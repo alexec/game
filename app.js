@@ -31,10 +31,17 @@ var arena = new Arena();
 var maxPlayerId = 0;
 var sockets = {};
 
+//arena.listener = function(event, data) {
+//  io.emit(event, data);
+//};
 
 io.sockets.on('connection', function(socket) {
-  var playerId = maxPlayerId;
-  var player = arena.addPlayer(playerId, parseInt(arena.width / 2), parseInt(arena.height / 2));
+  // TODO could add two gobblers
+  var playerId = arena.players[0] ?  maxPlayerId : 0;
+  var gobbler = playerId % Player.number == 0;
+  var x = parseInt(arena.width / 2 / arena.gridSpacing) * arena.gridSpacing ;
+  var y = parseInt(arena.height / 2 / arena.gridSpacing + (gobbler ? 6 : 0))  * arena.gridSpacing;
+  var player = arena.addPlayer(playerId, x, y, gobbler);
 
   socket.emit("syncArena", arena);
 
@@ -43,13 +50,18 @@ io.sockets.on('connection', function(socket) {
   socket.on('disconnect', function() {
     arena.removePlayer(playerId);
     delete sockets[socket];
+    io.emit('playerRemoved', {"playerId": playerId});
+    if (!arena.hasPlayers()) {
+      maxPlayerId = 0;
+    }
   })
   io.emit('playerAdded', {"playerId": playerId, "x": player.x, "y": player.y, "gobbler": player.gobbler});
 
   socket.on('changePlayerDirection', function(e) {
       var player = arena.players[playerId];
-      player.direction = e.direction;
-      io.emit('syncPlayer', {"playerId": playerId, "direction": e.direction, "x": player.x, "y": player.y});
+      player.nextDirection = e.nextDirection;
+      io.emit('syncPlayer', {"playerId": playerId, "direction": player.direction,
+        "nextDirection": e.nextDirection, "x": player.x, "y": player.y});
   });
 
   maxPlayerId++;

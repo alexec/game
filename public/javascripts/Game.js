@@ -1,7 +1,5 @@
 Game = {
-  fps: 60,
-  width: 23 * 32,
-  height: 23 * 32
+  fps: 60
 }
 
 Game._onEachFrame = (function() {
@@ -23,42 +21,42 @@ Game.start = function() {
 
   // creating a new websocket
   this.socket = io.connect('http://localhost:8000');
+  this.arena = new Arena();
+
   // on every message recived we print the new datas inside the #container div
   var canvas = document.createElement("canvas");
-  canvas.width = Game.width;
-  canvas.height = Game.height;
+  canvas.width = this.arena.width;
+  canvas.height = this.arena.height;
   document.body.appendChild(canvas);
 
   Game.context = canvas.getContext("2d");
-
-  Game.arena = new Arena();
-
-  console.log(Game.arena);
-
   Game._onEachFrame(Game.run);
 
   window.addEventListener('keydown', function(e) {
-    var direction =
+    var nextDirection =
       e.keyCode == Key.LEFT ? 'l':
       e.keyCode == Key.RIGHT ? 'r':
       e.keyCode == Key.UP ? 'u':
       'd';
 
-      Game.socket.emit("changePlayerDirection", {"direction": direction})
+      Game.socket.emit("changePlayerDirection", {"nextDirection": nextDirection})
   }, false);
 
   this.socket.on('syncArena', function(e) {
     Game.arena.grid = e.grid;
     Game.arena.players = e.players;
   });
+  this.socket.on('gridChanged', function(e) {
+    Game.arena.setGrid(e.x, e.y, e.value);
+  });
   this.socket.on('playerAdded', function(e) {
-    Game.arena.addPlayer(e.playerId, e.x, e.y);
+    Game.arena.addPlayer(e.playerId, e.x, e.y, e.gobbler);
   });
   this.socket.on('playerRemoved', function(e) {
     Game.arena.removePlayer(e.playerId);
   });
   this.socket.on('syncPlayer', function(e) {
-    Game.arena.syncPlayer(e.playerId, e.x, e.y, e.direction);
+    Game.arena.syncPlayer(e.playerId, e.x, e.y, e.direction, e.nextDirection);
   });
 };
 
