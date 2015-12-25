@@ -75,6 +75,7 @@ Arena.prototype.updatePlayer = function(player) {
   if (player.x % this.gridSpacing === 0 && player.y % this.gridSpacing === 0) {
     if (player.type === 0 && this.getGrid(player.x, player.y) > 0) {
       this.setGrid(player.x, player.y, 0);
+      player.score += 20;
     }
   }
   if (this.playerCanMove(player, player.direction)) {
@@ -120,6 +121,8 @@ Arena.prototype.playerCanMove  = function(player, direction) {
 Arena.prototype.addPlayer = function(playerId, x, y, type ) {
 
   console.log("addPlayer playerId=" + playerId + ", x=" + x + ", y=" + y, ", type=" + type);
+
+  this.playerId = this.playerId || playerId;
 
   var player = new Player(x, y, type);
   this.players[playerId] = player;
@@ -183,6 +186,14 @@ Arena.prototype.draw = function(ctx, spriteSheet) {
     for (var playerId in this.players) {
       var player = this.players[playerId];
       spriteSheet.drawPlayer(ctx, this.pillTimeLeft > 0, player, player.x, player.y);
+      if (playerId == this.playerId) {
+        ctx.fillStyle = "#ff0";
+        ctx.beginPath();
+        ctx.moveTo(player.x + this.gridSpacing * 0.25, player.y - this.gridSpacing * 0.75);
+        ctx.lineTo(player.x + this.gridSpacing * 0.75, player.y - this.gridSpacing * 0.75 );
+        ctx.lineTo(player.x + this.gridSpacing / 2, player.y - this.gridSpacing * 0.25);
+        ctx.fill();
+      }
     }
 };
 

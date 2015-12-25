@@ -13,6 +13,7 @@ ScoreChart.prototype.draw = function(ctx, players) {
   ctx.clearRect(this.left, 0, this.width, this.height);
   ctx.textAlign = "center";
   ctx.font = headingHeight + "px Arial";
+  ctx.fillStyle = "#fff";
   ctx.fillText("Scores", this.left + this.width / 2, this.top + headingHeight);
 
   var i = 0;

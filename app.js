@@ -71,11 +71,20 @@ io.sockets.on('connection', function(socket) {
 function redirectImmobilePlayers() {
   for (var playerId in arena.players) {
     var player = arena.players[playerId];
+    if (player.timeUntilForceMove == undefined) {
+      player.timeUntilForceMove = 10;
+    }
 
     if (!arena.playerCanMove(player, player.direction)) {
-      player.direction = player.nextDirection = "udlr".charAt(parseInt(Math.random() * 4));
-      io.emit('syncPlayer', {"playerId": playerId, "direction": player.direction,
-        "nextDirection": player.nextDirection, "x": player.x, "y": player.y});
+      if (player.timeUntilForceMove <= 0) {
+        player.nextDirection = "udlr".charAt(parseInt(Math.random() * 4));
+        io.emit('syncPlayer', {"playerId": playerId, "direction": player.direction,
+          "nextDirection": player.nextDirection, "x": player.x, "y": player.y});
+      } else {
+        player.timeUntilForceMove--;
+      }
+    } else {
+      player.timeUntilForceMove = 10;
     }
   }
 }
@@ -93,7 +102,7 @@ function slaughter() {
         if (murdererGobler !== victimGobbler && murderer.x === victim.x && murderer.y === victim.y) {
           var pos = getPosition(parseInt(Math.random() * 3), victim.type);
 
-          murderer.score += 100;
+          murderer.score += murdererGobler ? 100 : 1000;
           victim.alive = false;
           victim.x = pos.x;
           victim.y = pos.y;
