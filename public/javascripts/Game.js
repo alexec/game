@@ -21,11 +21,14 @@ Game.start = function() {
 
   // creating a new websocket
   this.socket = io.connect('http://localhost:8000');
+
+  this.spriteSheet = new SpriteSheet();
   this.arena = new Arena();
+  this.ScoreChart = new ScoreChart(this.arena.width);
 
   // on every message recived we print the new datas inside the #container div
   var canvas = document.createElement("canvas");
-  canvas.width = this.arena.width;
+  canvas.width = this.arena.width + this.ScoreChart.width;
   canvas.height = this.arena.height;
   document.body.appendChild(canvas);
 
@@ -83,12 +86,9 @@ Game.run = (function() {
 })();
 
 Game.draw = function() {
-  this.arena.draw(Game.context);
+  this.arena.draw(Game.context, this.spriteSheet);
 };
 
 Game.update = function() {
   this.arena.update();
 };
-
-var spriteSheet = new Image();
-spriteSheet.src = '/images/sprite-sheet.gif';

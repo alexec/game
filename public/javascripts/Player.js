@@ -6,6 +6,7 @@ function Player(x, y, type) {
   this.direction = '';
   this.nextDirection = '';
   this.alive = true;
+  this.score = 0;
 }
 
 Player.number = 5;

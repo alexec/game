@@ -69,8 +69,8 @@ io.sockets.on('connection', function(socket) {
 
 function slaughter() {
   var gobblerVulnerable = arena.pillTimeLeft <= 0;
-  for (var playerId in arena.players) {
-    var murderer = arena.players[playerId];
+  for (var murderePlayerId in arena.players) {
+    var murderer = arena.players[murderePlayerId];
     var murdererGobler = murderer.type === 0;
     if (murdererGobler && !gobblerVulnerable || !murdererGobler && gobblerVulnerable) {
       for (var playerId in arena.players) {
@@ -80,11 +80,13 @@ function slaughter() {
         if (murdererGobler !== victimGobbler && murderer.x === victim.x && murderer.y === victim.y) {
           var pos = getPosition(parseInt(Math.random() * 3), victim.type);
 
+          murderer.score += 100;
           victim.alive = false;
           victim.x = pos.x;
           victim.y = pos.y;
 
           io.emit("playerKilled", {"playerId": playerId, "x": victim.x, "y": victim.y});
+          io.emit("scoreChanged", {"playerId": murderePlayerId, "score": murderer.score});
         }
       }
     }
