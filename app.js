@@ -12,8 +12,9 @@ console.log('server listening on localhost:8000');
 
 // on server started we can load our client.html page
 function handler(req, res) {
-  console.log(req.url);
-  fs.readFile(__dirname + '/public/' + req.url, function(err, data) {
+  var url = req.url === '/' ? 'index.html': req.url;
+  console.log(url);
+  fs.readFile(__dirname + '/public/' + url, function(err, data) {
     if (err) {
       console.log(err);
       res.writeHead(500);
@@ -67,6 +68,18 @@ io.sockets.on('connection', function(socket) {
   maxPlayerId++;
 });
 
+function redirectImmobilePlayers() {
+  for (var playerId in arena.players) {
+    var player = arena.players[playerId];
+
+    if (!arena.playerCanMove(player, player.direction)) {
+      player.direction = player.nextDirection = "udlr".charAt(parseInt(Math.random() * 4));
+      io.emit('syncPlayer', {"playerId": playerId, "direction": player.direction,
+        "nextDirection": player.nextDirection, "x": player.x, "y": player.y});
+    }
+  }
+}
+
 function slaughter() {
   var gobblerVulnerable = arena.pillTimeLeft <= 0;
   for (var murderePlayerId in arena.players) {
@@ -103,6 +116,7 @@ var run = (function() {
 
     while ((new Date).getTime() > nextGameTick && loops < maxFrameSkip) {
       arena.update();
+      redirectImmobilePlayers();
       slaughter();
 
       nextGameTick += skipTicks;
