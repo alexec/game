@@ -22,13 +22,13 @@ Game.start = function() {
   // creating a new websocket
   this.socket = io.connect('http://localhost:8000');
 
-  this.spriteSheet = new SpriteSheet();
   this.arena = new Arena();
-  this.ScoreChart = new ScoreChart(this.arena.width);
+  this.spriteSheet = new SpriteSheet(this.arena.gridSpacing);
+  this.scoreChart = new ScoreChart(this.arena.width, 200, this.arena.height, this.spriteSheet);
 
   // on every message recived we print the new datas inside the #container div
   var canvas = document.createElement("canvas");
-  canvas.width = this.arena.width + this.ScoreChart.width;
+  canvas.width = this.arena.width + this.scoreChart.width;
   canvas.height = this.arena.height;
   document.body.appendChild(canvas);
 
@@ -64,6 +64,9 @@ Game.start = function() {
   this.socket.on('playerKilled', function(e) {
     Game.arena.killPlayer(e.playerId, e.x, e.y);
   });
+  this.socket.on('scoreChanged', function(e) {
+    Game.arena.setPlayerScore(e.playerId, e.score);
+  });
 };
 
 Game.run = (function() {
@@ -87,8 +90,8 @@ Game.run = (function() {
 
 Game.draw = function() {
   this.arena.draw(Game.context, this.spriteSheet);
+  this.scoreChart.draw(Game.context, this.arena.players);
 };
-
 Game.update = function() {
   this.arena.update();
 };

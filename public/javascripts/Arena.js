@@ -148,13 +148,12 @@ Arena.prototype.killPlayer = function(playerId, x, y) {
 };
 
 Arena.prototype.draw = function(ctx, spriteSheet) {
-  var canvas = ctx.canvas;
     var w = this.gridSpacing;
     var h = this.gridSpacing;
 
-    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.clearRect(0,0,this.width, this.height);
     ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,canvas.width, canvas.height);
+    ctx.fillRect(0,0,this.width, this.height);
 
     for (var x = 0; x < this.width; x += this.gridSpacing) {
         for (var y = 0; y < this.height; y += this.gridSpacing) {
@@ -182,9 +181,14 @@ Arena.prototype.draw = function(ctx, spriteSheet) {
     }
 
     for (var playerId in this.players) {
-      spriteSheet.drawPlayer(ctx, this, this.players[playerId]);
+      var player = this.players[playerId];
+      spriteSheet.drawPlayer(ctx, this.pillTimeLeft > 0, player, player.x, player.y);
     }
 };
+
+Arena.prototype.setPlayerScore = function(playerId, score) {
+  this.players[playerId].score = score;
+}
 
 Arena.prototype.bestType = function() {
   var typeCount = {0:0, 1:0, 2:0, 3:0, 4:0};
