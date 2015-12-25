@@ -17,7 +17,7 @@ Game._onEachFrame = (function() {
   }
 })();
 
-Game.start = function() {
+Game.start = function(canvas) {
 
   // creating a new websocket
   this.socket = io.connect('http://localhost:8000');
@@ -27,10 +27,8 @@ Game.start = function() {
   this.scoreChart = new ScoreChart(this.arena.width, 200, this.arena.height, this.spriteSheet);
 
   // on every message recived we print the new datas inside the #container div
-  var canvas = document.createElement("canvas");
   canvas.width = this.arena.width + this.scoreChart.width;
   canvas.height = this.arena.height;
-  document.body.appendChild(canvas);
 
   Game.context = canvas.getContext("2d");
   Game._onEachFrame(Game.run);
@@ -42,7 +40,7 @@ Game.start = function() {
       e.keyCode == Key.UP ? 'u':
       'd';
 
-      Game.socket.emit("changePlayerDirection", {"nextDirection": nextDirection})
+      Game.socket.emit("changePlayerDirection", {"nextDirection": nextDirection});
   }, false);
 
   this.socket.on('syncArena', function(e) {

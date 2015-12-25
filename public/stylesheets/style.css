@@ -6,3 +6,12 @@ body {
    padding: 10px;
    border: 1px solid #fff;
  }
+
+ button {
+   width: 64px;
+   height: 64px;
+   color: #fff;
+   font-size: 200%;
+   background-color: #00f;
+   border: 1px solid #008;
+ }

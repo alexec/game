@@ -4,15 +4,22 @@
         <link rel="stylesheet" href="stylesheets/style.css"/>
     </head>
     <body>
+      <canvas></canvas>
+      <div>
+        <button onclick="Game.socket.emit('changePlayerDirection', {'nextDirection': 'l'});">&larr;</button>
+        <button onclick="Game.socket.emit('changePlayerDirection', {'nextDirection': 'u'});">&uarr;</button>
+        <button onclick="Game.socket.emit('changePlayerDirection', {'nextDirection': 'd'});">&darr;</button>
+        <button onclick="Game.socket.emit('changePlayerDirection', {'nextDirection': 'r'});">&rarr;</button>
+      </div>
     <script src="socket.io/socket.io.js"></script>
     <script src="javascripts/jquery-1.7.1.min.js"></script>
     <script src="javascripts/Player.js"></script>
     <script src="javascripts/Arena.js"></script>
     <script src="javascripts/Key.js"></script>
     <script src="javascripts/ScoreChart.js"></script>
-    <script src="javascripts/spriteSheet.js"></script>
+    <script src="javascripts/SpriteSheet.js"></script>
     <script src="javascripts/Game.js"></script>
-    <script>$(function() {Game.start();})</script>
+    <script>$(function() {Game.start(document.getElementsByTagName("canvas")[0]);})</script>
 
     </body>
 </html>
