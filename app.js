@@ -5,7 +5,6 @@ var app = require('http').createServer(handler),
   parser = new require('xml2json'),
   fs = require('fs');
 
-// creating the server ( localhost:8000 )
 app.listen(8000);
 
 console.log('server listening on localhost:8000');
