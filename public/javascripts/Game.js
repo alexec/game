@@ -20,7 +20,7 @@ Game._onEachFrame = (function() {
 Game.start = function(canvas) {
 
   // creating a new websocket
-  this.socket = io.connect('http://localhost:8000');
+  this.socket = io.connect(document.location.href);
 
   this.arena = new Arena();
   this.spriteSheet = new SpriteSheet(this.arena.gridSpacing);
