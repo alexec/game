@@ -2,8 +2,7 @@
 
 Start:
 
-  npm install socket.io
-  npm install xml2json
-  node app.js
+    npm install socket.io
+    node app.js
 
 Then open <http://localhost:8000>.
